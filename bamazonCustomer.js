@@ -1,3 +1,10 @@
+// converted database to inventory table so that it;s hopefully easier to compare answers with database info
+// now i need database id chosen by user to console.log(the product they wanted)--> needs to match database item_id
+// then need to check inventory of that product and see if quantity selected <= to the amount i have in stock
+// display error message if not in stock
+// change quantity in database if quantity selected valid
+
+
 // Load the NPM Package inquirer
 const inquirer = require("inquirer");
 
@@ -42,94 +49,67 @@ function openList() {
 
 
 
-// listing all items in console
+// grabbing table from database
 function listItems() {
-    connection.query("SELECT item_id, product_name, price FROM products", function (err, result) {
+    connection.query("SELECT item_id, product_name, department_name, price, stock_quantity FROM products", function (err, result) {
         if (err) throw err;
-        console.log(result);
+
+        // turn database entries into a table to compare with user answers in inquirer
+        for (let i = 0; i < result.length; i++) {
+            console.log(`Item ID: ${result[i].item_id} | Product: ${result[i].product_name} | Department: ${result[i].department_name} | Price: ${result[i].price} | Stock: ${result[i].stock_quantity}`);
+        };
         chooseItem();
     });
 };
 
 // user chooses item by id (list)
 function chooseItem() {
-inquirer.prompt([
-
-    {
-        type: 'expand',
-        name: 'item_id',
-        message: 'Choose which item you would like to purchase by selecting an item id from the list:',
-        choices: [
-            {
-                key: '1',
-                name: 'croissant',
-                value: 'croissant'
-            },
-            {
-                key: '2',
-                name: 'latte',
-                value: 'latte'
-            },
-            {
-                key: '3',
-                name: 'toronto',
-                value: 'toronto'
-            },
-            {
-                key: '4',
-                name: 'chips',
-                value: 'chips'
-            },
-            {
-                key: '5',
-                name: 'cappuccino',
-                value: 'cappuccino'
-            },
-            {
-                key: '6',
-                name: 'wine',
-                value: 'wine'
-            },
-            {
-                key: '7',
-                name: 'Huckleberry Finn',
-                value: 'Huckleberry Finn'
-            },
-            
-            {
-                key: '8',
-                name: 'Don Quixote',
-                value: 'Don Quixote'
-            },
-            {
-                key: '9',
-                name: 'Robin Hood',
-                value: 'Robin Hood'
-            },
-            {
-                key: '10',
-                name: 'Cannery Road',
-                value: 'Cannery Road'
-            },
-        ]
-    },
-])};
-
-// customer selects quantity of product needed
-function selectQuantity() {
     inquirer.prompt([
         {
             type: "input",
-            name: "quantity",
-            message: "How many would you like?",
+            name: "itemId",
+            message: "Select the item you wish to purchase by id",
             validate: function (value) {
-                var valid = !isNaN(parseFloat(value));
+                var valid = !isNaN(parseFloat(value)) && value<=10;
                 return valid || 'Please enter a number';
             },
             filter: Number
         }
-    ]);
+    ])
 };
+
+    
+    // .then(
+    //     function(answers){
+    //         matchName();
+    //     }
+    // );
+
+    // function for matching item_id's with product_name in mysql
+    // function matchName (){
+    //     if(answers.itemId === )
+    //     connection.query("SELECT item_id, product_name, price FROM products", function (err, result) {
+    //         if (err) throw err;
+    //         console.log(result);
+    //         chooseItem();
+    // }
+
+
+    // customer selects quantity of product needed
+//     function selectQuantity() {
+//     inquirer.prompt([
+//         {
+//             type: "input",
+//             name: "quantity",
+//             message: "How many would you like?",
+//             validate: function (value) {
+//                 var valid = !isNaN(parseFloat(value));
+//                 return valid || 'Please enter a number';
+//             },
+//             filter: Number
+//         }
+//     ]);
+// };
 
 
     // {
