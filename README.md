@@ -7,21 +7,24 @@ Customers can select a product by id, input the amount that they would like to p
 
 ## How it Works
 
-### 1. Our Home Page displays a **Featured Artist**, click on the band name to find out more information about them!
+### 1. Select an item by id, then input the amount you would like to purchase. 
 
-![Loading Page Demo](https://github.com/bessygmartinez/tempo/blob/readme/tempo_demos/loading_page.gif)
+![Demo](https://github.com/monicarocios/Node.js-MySQL-Homework/blob/master/demo/bamazon_demo.gif)
 
-### 2. Click on the **About** page to learn more about our motivation behind the project and meet the team.
+### 2. Our database updates once you purchase a valid quantity (does not exceed stock)
 
-![Loading Page Demo](https://github.com/bessygmartinez/tempo/blob/readme/tempo_demos/about_page.gif)
+![Demo](https://github.com/monicarocios/Node.js-MySQL-Homework/blob/master/demo/update_function_db.gif)
 
-### 3. Our **Band Directory** displays all of our bands, categorized alphabetically and by genre.
+## Warnings
 
-![Loading Page Demo](https://github.com/bessygmartinez/tempo/blob/readme/tempo_demos/directory_page.gif)
+### 1. This warning will show if you select an id that does not exist in our inventory
 
-### 4. Click on the **ADD A BAND** button to enter a new band's information!
+![Demo](https://github.com/monicarocios/Node.js-MySQL-Homework/blob/master/demo/select_item_warning.gif)
 
-![Loading Page Demo](https://github.com/bessygmartinez/tempo/blob/readme/tempo_demos/add_a_band.gif)
+### 2. This warning will show if the quantity you select exceeds the amount of that product that we have in stock
+
+![Demo](https://github.com/monicarocios/Node.js-MySQL-Homework/blob/master/demo/quantity_exceeds_stock_warning.gif)
+
 
 ## Frameworks Used
 
