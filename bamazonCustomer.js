@@ -22,7 +22,6 @@ connection.connect(function (err) {
         console.error('error connecting: ' + err.stack);
     } else{
         console.log('connected as id ' + connection.threadId);
-
         openList();
     };
 });
@@ -37,8 +36,8 @@ function openList() {
             message: 'Welcome! Would you like to buy something?',
         }
 
-    ]).then(function (answers) {
-        if (answers.openList === true) {
+    ]).then(function (response) {
+        if (response.openList === true) {
             listItems();
         } else {
             console.log("See you next time!");
@@ -47,98 +46,93 @@ function openList() {
     });
 };
 
-
-
 // grabbing table from database
 function listItems() {
-    connection.query("SELECT item_id, product_name, department_name, price, stock_quantity FROM products", function (err, result) {
-        if (err) throw err;
+    // connection.query("SELECT item_id, product_name, department_name, price, stock_quantity FROM products", function (err, result) {
+    //     if (err) throw err;
 
-        // turn database entries into a table to compare with user answers in inquirer
-        for (let i = 0; i < result.length; i++) {
-            console.log(`Item ID: ${result[i].item_id} | Product: ${result[i].product_name} | Department: ${result[i].department_name} | Price: ${result[i].price} | Stock: ${result[i].stock_quantity}`);
-        };
-        chooseItem();
+    //     // turn database entries into a table to compare with user answers in inquirer
+    //     for (let i = 0; i < result.length; i++) {
+    //         console.log(`Item ID: ${result[i].item_id} | Product: ${result[i].product_name} | Department: ${result[i].department_name} | Price: ${result[i].price} | Stock: ${result[i].stock_quantity}`);
+    //         let stock = result[i].stock_quantity
+    //     };
+
+    connection.query("SELECT * FROM products", function(err, result) {
+        if (err) throw err;
+        console.table(result);
+        let itemsTable = Object.values(result);
+        chooseItem(itemsTable);
+        
     });
 };
 
+
 // user chooses item by id (list)
-function chooseItem() {
+function chooseItem(itemsTable) {
     inquirer.prompt([
         {
             type: "input",
             name: "itemId",
             message: "Select the item you wish to purchase by id",
             validate: function (value) {
-                var valid = !isNaN(parseFloat(value)) && value<=10;
+                var valid = !isNaN(parseFloat(value));
                 return valid || 'Please enter a number';
-            },
-            filter: Number
+            }
         }
-    ])
+    ]).then(function(response) {
+        // limit the number user can input, with console.log("select an item from the list"); and listItems(); --> if NaN
+        // if it is a number, then chooseQuantity()
+        console.log(`Your item id is: ${response.itemId}`);
+        if (response.itemId > itemsTable.length) {
+            console.log("Please choose an existing item");
+            listItems();
+
+        } else {
+            const index = response.itemId - 1;
+            chooseQuantity(itemsTable, index);
+        }
+    });
 };
 
-    
-    // .then(
-    //     function(answers){
-    //         matchName();
-    //     }
-    // );
 
-    // function for matching item_id's with product_name in mysql
-    // function matchName (){
-    //     if(answers.itemId === )
-    //     connection.query("SELECT item_id, product_name, price FROM products", function (err, result) {
-    //         if (err) throw err;
-    //         console.log(result);
-    //         chooseItem();
-    // }
+// next function needed to query database has to match the id given in user input
+// function chooseQuantity (){
 
+function chooseQuantity(itemsTable, index) {
+    inquirer.prompt([
+        {
+            type: "input",
+            name: "quantity",
+            message: "How many would you like?",
+            validate: function (value) {
+                var valid = !isNaN(parseFloat(value));
+                return valid || 'Please enter a number';
+            }
+        }
+    ]).then(function (response) {
+        if (response.quantity <= itemsTable[index].stock_quantity) {
+            console.log("--------------------------------------------------------------------");
+            console.log(`You purchased: ${response.quantity} ${itemsTable[index].product_name} for ${itemsTable[index].price} each`);
+            updateInventory(itemsTable[index].item_id, itemsTable[index].stock_quantity, response.quantity, itemsTable[index].product_name);
 
-    // customer selects quantity of product needed
-//     function selectQuantity() {
-//     inquirer.prompt([
-//         {
-//             type: "input",
-//             name: "quantity",
-//             message: "How many would you like?",
-//             validate: function (value) {
-//                 var valid = !isNaN(parseFloat(value));
-//                 return valid || 'Please enter a number';
-//             },
-//             filter: Number
-//         }
-//     ]);
-// };
+        } else {
+            console.log("We don't have enough of that item in stock, please choose a smaller amount to purchase.");
+            chooseQuantity();
+        }
+    });
+};
 
+// update inventory
 
-    // {
-        // check on the product and if there's enough of it 
-        // if answers.quantity < or = to item quantity in database, then subtract item quanitity-answers.quantity in database
-
-    //     when: function (answers) {
-    //         return answers. !== 'Nope, all good!';
-
-    // }.then(function (user) {
-
-//         // If store has enough of the product user chose...
-//         if (quantity) {
-
-//             console.log("==============================================");
-
-//         }
-
-
-//         // If the user doesn't guess the password...
-//         else {
-
-//             console.log("othert thing=======");
-//         }
-// //     });
-
-// };
-
-
-// need to move on with instructions after creating server
-// include inquirer in here and make sure i npm install mysql, npm install inquirer
-// how do you select specific item quantity available in database to see if user asked for less than what is available
+function updateInventory(item_id, stock_quantity, chooseQuantity, product_name) {
+    let newQuantity = stock_quantity - chooseQuantity;
+    const query = connection.query(
+        "UPDATE products SET stock_quantity=" + newQuantity + " WHERE item_id = " + item_id + ";",
+        function (err, res) {
+            if (err) {
+                throw err;
+            } else{
+                console.log(`Only ${newQuantity} ${product_name}'s remaining.`)
+            }
+        });
+};
